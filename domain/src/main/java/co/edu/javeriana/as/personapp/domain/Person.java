@@ -14,21 +14,29 @@ import lombok.ToString;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Person {
-	@NonNull
-	private Integer identification;
-	@NonNull
-	private String firstName;
-	@NonNull
-	private String lastName;
-	@NonNull
-	private Gender gender;
-	private Integer age;
-	@ToString.Exclude
-	private List<Phone> phoneNumbers;
-	@ToString.Exclude
-	private List<Study> studies;
 
-	public Boolean isValidAge() {
-		return this.age >= 0;
-	}
+    @NonNull
+    private Integer identification;   // corresponde a cc INT(15)
+
+    @NonNull
+    private String firstName;         // nombre VARCHAR(45)
+
+    @NonNull
+    private String lastName;          // apellido VARCHAR(45)
+
+    @NonNull
+    private Gender gender;            // ENUM('M','F','OTHER')
+
+    private Integer age;              // edad INT(3)
+
+    // Relaciones con teléfono y estudios
+    @ToString.Exclude
+    private List<Phone> phoneNumbers; // teléfonos asociados
+
+    @ToString.Exclude
+    private List<Study> studies;      // estudios asociados
+
+    public Boolean isValidAge() {
+        return this.age >= 0;
+    }
 }
