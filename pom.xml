@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>co.edu.javeriana.as</groupId>
 	<artifactId>personapp-hexa-spring-boot</artifactId>
-	<version>${revision}</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>PersonAPP</name>
 	<description>App Hexagonal (Clean Architecture) Multi Module PersonAPP</description>
 	<packaging>pom</packaging>

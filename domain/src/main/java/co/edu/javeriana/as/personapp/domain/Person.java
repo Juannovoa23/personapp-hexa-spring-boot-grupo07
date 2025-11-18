@@ -39,4 +39,8 @@ public class Person {
     public Boolean isValidAge() {
         return this.age >= 0;
     }
+    public Person(Integer identification) {
+        this.identification = identification;
+    }
+
 }

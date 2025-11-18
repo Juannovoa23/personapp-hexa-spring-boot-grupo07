@@ -1,58 +1,57 @@
 package co.edu.javeriana.as.personapp.mongo.mapper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import co.edu.javeriana.as.personapp.common.annotations.Mapper;
 import co.edu.javeriana.as.personapp.domain.Profession;
-import co.edu.javeriana.as.personapp.domain.Study;
-import co.edu.javeriana.as.personapp.mongo.document.EstudiosDocument;
 import co.edu.javeriana.as.personapp.mongo.document.ProfesionDocument;
 
-@Mapper
+@Component
 public class ProfesionMapperMongo {
-	
-	@Autowired
-	private EstudiosMapperMongo estudiosMapperMongo;
 
-	public ProfesionDocument fromDomainToAdapter(Profession profession) {
-		ProfesionDocument profesionDocument = new ProfesionDocument();
-		profesionDocument.setId(profession.getIdentification());
-		profesionDocument.setNom(profession.getName());
-		profesionDocument.setDes(validateDes(profession.getDescription()));
-		profesionDocument.setEstudios(validateEstudios(profession.getStudies()));
-		return profesionDocument;
-	}
+    /**
+     * Domain -> Mongo Document
+     */
+    public ProfesionDocument fromDomainToAdapter(Profession profession) {
+        ProfesionDocument document = new ProfesionDocument();
 
-	private String validateDes(String description) {
-		return description != null ? description : "";
-	}
+        if (profession.getIdentification() != null && profession.getName() != null) {
+            String id = buildId(profession.getIdentification(), profession.getName());
+            document.setId(id);
+        }
 
-	private List<EstudiosDocument> validateEstudios(List<Study> studies) {
-		return studies != null && !studies.isEmpty() ? studies.stream()
-				.map(study -> estudiosMapperMongo.fromDomainToAdapter(study)).collect(Collectors.toList())
-				: new ArrayList<EstudiosDocument>();
-	}
+        document.setNom(profession.getName());
+        document.setDes(profession.getDescription());
 
-	public Profession fromAdapterToDomain(ProfesionDocument profesionDocument) {
-		Profession profession = new Profession();
-		profession.setIdentification(profesionDocument.getId());
-		profession.setName(profesionDocument.getNom());
-		profession.setDescription(validateDescription(profesionDocument.getDes()));
-		profession.setStudies(validateStudies(profesionDocument.getEstudios()));
-		return profession;
-	}
+        // estudios se manejan por @DocumentReference (no se mapean aquí)
+        return document;
+    }
 
-	private String validateDescription(String des) {
-		return des != null ? des : "";
-	}
+    /**
+     * Mongo Document -> Domain
+     */
+    public Profession fromAdapterToDomain(ProfesionDocument document) {
+        Profession profession = new Profession();
 
-	private List<Study> validateStudies(List<EstudiosDocument> estudiosDocument) {
-		return estudiosDocument != null && !estudiosDocument.isEmpty() ? estudiosDocument.stream()
-				.map(estudio -> estudiosMapperMongo.fromAdapterToDomain(estudio)).collect(Collectors.toList())
-				: new ArrayList<Study>();
-	}
+        // identification la reconstruimos desde el id "identification-name"
+        if (document.getId() != null) {
+            try {
+                String[] parts = document.getId().split("-", 2);
+                if (parts.length > 0) {
+                    Integer identification = Integer.parseInt(parts[0]);
+                    profession.setIdentification(identification);
+                }
+            } catch (NumberFormatException e) {
+                // si el id no tiene el formato esperado, simplemente no seteamos identification
+            }
+        }
+
+        profession.setName(document.getNom());
+        profession.setDescription(document.getDes());
+        // studies se podría mapear desde document.getEstudios() en otro mapper/servicio
+        return profession;
+    }
+
+    private String buildId(Integer identification, String name) {
+        return identification + "-" + name;
+    }
 }

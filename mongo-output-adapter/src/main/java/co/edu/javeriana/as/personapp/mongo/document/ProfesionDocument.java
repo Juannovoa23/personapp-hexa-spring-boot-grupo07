@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Document("profesion")
 public class ProfesionDocument {
 	@Id
-	private Integer id;
+	private String id;
 	private String nom;
 	private String des;
 	@DocumentReference(lazy = true, lookup = "{ 'primaryProfesion' : ?#{#self._id} }")

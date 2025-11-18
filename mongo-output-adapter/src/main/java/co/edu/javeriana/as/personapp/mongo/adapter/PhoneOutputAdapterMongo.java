@@ -1,0 +1,59 @@
+package co.edu.javeriana.as.personapp.mongo.adapter;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import co.edu.javeriana.as.personapp.application.port.out.PhoneOutputPort;
+import co.edu.javeriana.as.personapp.common.annotations.Adapter;
+import co.edu.javeriana.as.personapp.domain.Phone;
+import co.edu.javeriana.as.personapp.mongo.document.TelefonoDocument;
+import co.edu.javeriana.as.personapp.mongo.mapper.TelefonoMapperMongo;
+import co.edu.javeriana.as.personapp.mongo.repository.TelefonoRepositoryMongo;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Adapter
+public class PhoneOutputAdapterMongo implements PhoneOutputPort {
+
+    @Autowired
+    private TelefonoRepositoryMongo telefonoRepositoryMongo;
+
+    @Autowired
+    private TelefonoMapperMongo telefonoMapperMongo;
+
+    @Override
+    public Phone save(Phone phone) {
+        log.debug("Into save on PhoneOutputAdapterMongo");
+        TelefonoDocument doc = telefonoMapperMongo.fromDomainToAdapter(phone);
+        TelefonoDocument saved = telefonoRepositoryMongo.save(doc);
+        return telefonoMapperMongo.fromAdapterToDomain(saved);
+    }
+
+    @Override
+    public Boolean delete(String number) {
+        log.debug("Into delete on PhoneOutputAdapterMongo");
+        if (!telefonoRepositoryMongo.existsById(number)) {
+            return Boolean.FALSE;
+        }
+        telefonoRepositoryMongo.deleteById(number);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public List<Phone> find() {
+        log.debug("Into find on PhoneOutputAdapterMongo");
+        return telefonoRepositoryMongo.findAll().stream()
+                .map(telefonoMapperMongo::fromAdapterToDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Phone findByNumber(String number) {
+        log.debug("Into findByNumber on PhoneOutputAdapterMongo");
+        return telefonoRepositoryMongo.findById(number)
+                .map(telefonoMapperMongo::fromAdapterToDomain)
+                .orElse(null);
+    }
+}
